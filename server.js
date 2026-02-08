@@ -15,14 +15,6 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// MongoDB connection
-let isConnected = false;
-const connectMongo = async () => {
-    if (!isConnected) {
-        await connectDB();
-        isConnected = true;
-    }
-};
 
 // Routes
 app.use("/api/blogs", blogRoutes);
@@ -30,44 +22,28 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/auth", authRoutes);
 
 
-// get all blogs 
-app.get("/api/blogs", async (req, res) => {
-    try {
-        const blogs = await BlogModel.find();
-        res.json(blogs);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// get all categories
-app.get("/api/categories", async (req, res) => {
-    try {
-        const categories = await CategoryModel.find();
-        res.json(categories);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// get all users 
-app.get("/api/auth", async (req, res) => {
-    try {
-        const users = await userModel.find();
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // Root test route 
 app.get("/", (req, res) => {
     res.json({ message: "API is working ✅" });
 });
 
 
-// app.listen(process.env.PORT, () => {
-//     console.log(`🚀 Server running on port ${process.env.PORT}`);
-// });
+// Local dev start 
+if (process.env.NODE_ENV !== "production") {
+    const PORT = process.env.PORT || 2009;
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+    });
+}
 
-export default app;
+// Vercel / serverless handler
+export default async function handler(req, res) {
+    try {
+        await connectDB();
+    } catch (err) {
+        console.error("MongoDB connection failed in handler:", err);
+        res.status(500).json({ error: "Database connection failed" });
+        return;
+    }
+    return app(req, res);
+}
