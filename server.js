@@ -70,7 +70,4 @@ app.get("/", (req, res) => {
 //     console.log(`🚀 Server running on port ${process.env.PORT}`);
 // });
 
-export default async function handler(req, res) {
-  await connectMongo();
-  app(req, res);
-}
+export default app;
