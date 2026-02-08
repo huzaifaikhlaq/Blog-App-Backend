@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";  // ← Make sure case matches filename
 import blogRoutes from "./routes/blogRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -21,9 +21,9 @@ app.get("/", (req, res) => {
 });
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/categories", categoryRoutes);
-app.use("/api/auth", authRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -49,5 +49,4 @@ if (process.env.NODE_ENV !== "production") {
     });
 }
 
-// Export for Vercel
 export default app;
